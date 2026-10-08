@@ -7,8 +7,6 @@ A handheld Pong game for Arduino, drawn on a 128×64 SSD1306 OLED display and co
 | Path | Description |
 | --- | --- |
 | `Pong/` | Main single-player Pong game (player vs. bot) |
-| `Mark III/Pong/` | Later iteration of the game |
-| `Mark III - 2 Player/Pong/` | Two-player variant with a second joystick on `A2` / pin `3` |
 | `Networking/` | Wi-Fi server sketch (Arduino) and a Processing client excerpt |
 | `Console Wireing.fzz` | Fritzing wiring diagram for the console |
 
@@ -127,7 +125,7 @@ This file is an excerpt from the Processing GUI client, not a complete sketch. I
 
 ---
 
-## Known issues / notes
+## Notes
 
 - The bottom of the developer's OLED has dead pixels, and the top band shows in yellow. Two-colour SSD1306 modules have a yellow strip at the top, so this is expected on that hardware.
 - When the ball hits a paddle, its horizontal speed is set to ±1 (`pow(-1, count)`). This means the ball moves slower after its first bounce than when it is served (`dx = 2`).
