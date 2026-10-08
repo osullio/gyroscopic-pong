@@ -1,20 +1,37 @@
 # Circuits and Systems Design – Arduino Pong
 
-A handheld Pong game for Arduino, drawn on a 128×64 SSD1306 OLED display and controlled with an analog joystick. You play against a bot that predicts where the ball will go. The repo also contains a networking sketch, carried over from an earlier buggy project, to use as a starting point for talking to a laptop over Wi-Fi.
+A handheld Pong game for Arduino, drawn on a 128×64 SSD1306 OLED display. You play against a bot that predicts where the ball will go.
+
+[![Watch the finished console on YouTube](https://img.youtube.com/vi/TQeReYXM4l0/hqdefault.jpg)](https://youtu.be/TQeReYXM4l0)
+
+▶ **[Watch the finished product on YouTube](https://youtu.be/TQeReYXM4l0)**
+
+> **Note:** The video shows the finished console. The code in this repository is the **first iteration**, which uses a wired analog joystick, and does not yet match what's in the video. See [Project status](#project-status) below.
+
+## Project status
+
+| Stage | Input | Connection | In this repo? |
+| --- | --- | --- | --- |
+| **1. First iteration** | Analog joystick (Y axis + push-button) | Wired to the main Arduino | ✅ Yes (`Pong/`) |
+| **2. Planned / finished build** | Gyroscopic sensor (tilt to move) + push-button (serve) | Arduino Nano with Wi-Fi, wireless link to the console | ❌ Not yet |
+
+The plan is to replace the joystick with a handheld controller: a **gyroscopic sensor** that moves the paddle when you tilt it, and a **push-button** to serve, both connected to an **Arduino Nano with Wi-Fi**. The controller sends its input to the console wirelessly, so the player isn't tied to the board by cables. The `Networking/` sketch is the starting point for that wireless link.
+
+The rest of this README describes the code as it stands (the joystick version).
 
 ## Repository layout
 
 | Path | Description |
 | --- | --- |
-| `Pong/` | Main single-player Pong game (player vs. bot) |
-| `Networking/` | Wi-Fi server sketch (Arduino) and a Processing client excerpt |
-| `Console Wireing.fzz` | Fritzing wiring diagram for the console |
+| `Pong/` | Main single-player Pong game (player vs. bot), joystick version |
+| `Networking/` | Wi-Fi server sketch (Arduino) and a Processing client excerpt, the starting point for the wireless controller |
+| `fritzing/Console Wireing.fzz` | Fritzing wiring diagram for the console |
 
 ---
 
 ## Pong
 
-### Hardware
+### Hardware (first iteration)
 
 - **Board:** Arduino (needs interrupt support on pin 2)
 - **Display:** SSD1306 128×64 OLED, connected over software SPI
@@ -30,7 +47,7 @@ A handheld Pong game for Arduino, drawn on a 128×64 SSD1306 OLED display and co
 | Joystick Y axis | A1 |
 | Joystick click | 2 (`INPUT_PULLUP`, interrupt) |
 
-See `Console Wireing.fzz` for the full wiring diagram.
+See `fritzing/Console Wireing.fzz` for the full wiring diagram.
 
 ### Dependencies
 
@@ -53,6 +70,8 @@ Install these through the Arduino Library Manager:
 3. **Push the joystick up or down** to move your paddle. Readings above 550 move it up and readings below 450 move it down; anything in between is a dead zone. The paddle cannot leave the screen.
 4. The ball bounces off the top and bottom edges. When it hits a paddle, its horizontal direction flips.
 5. If the ball leaves the left or right edge of the screen, it is removed and you can serve again.
+
+In the planned build, step 3 becomes tilting the gyroscopic controller, and step 2 becomes pressing the controller's push-button. The serve and movement logic stays the same, but its input arrives over Wi-Fi instead of from the analog pin and interrupt.
 
 ### Game loop
 
@@ -92,11 +111,11 @@ Open `Pong/Pong.ino` in the Arduino IDE. The IDE loads `functions.ino` as an ext
 
 ## Networking
 
-This folder is a reference sketch based on the Wi-Fi protocol from an earlier buggy project. It is meant as a template for adding laptop communication to this project. The buggy-specific calls are left in as comments.
+This folder is a reference sketch based on the Wi-Fi protocol from an earlier buggy project. It is the starting point for the wireless link between the gyroscopic controller and the console. The buggy-specific calls are left in as comments.
 
 ### Arduino side (`Networking.ino`, `functions.ino`)
 
-- Uses the `WiFiS3` library, so it targets the **Arduino UNO R4 WiFi**.
+- Uses the `WiFiS3` library, so it currently targets the **Arduino UNO R4 WiFi**. The Wi-Fi library calls will need updating to match the Wi-Fi Nano used for the controller.
 - Joins the network set by `ssid` and `pass`, then starts a `WiFiServer` on **port 5200**.
 - On every loop it checks for a connected client (`laptop`):
   - `sendUpdate()` sends `'u'` to announce an update. The buggy version then sent the wheel count, obstacle range, buggy speed and target speed.
@@ -111,7 +130,7 @@ This file is an excerpt from the Processing GUI client, not a complete sketch. I
 - `dataEval(char)` handles the incoming message codes listed below.
 - `send()` sends the speed only when it has changed. When it sends `0`, it waits for the wheel count so it can update the distance travelled (`count * π * 6.5`).
 
-### Protocol
+### Protocol (from the buggy project)
 
 | Direction | Message | Meaning |
 | --- | --- | --- |
